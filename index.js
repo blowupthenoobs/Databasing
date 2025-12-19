@@ -32,9 +32,9 @@ app.get("/select", async (req, res) => {
 
 app.get("/insert", async (req, res) => {
     User.create({
-        username: "testaccount",
-        email: "testing123@gmail.com",
-        password: "12345678"
+        username: req.username,
+        email: req.email,
+        password: req.password
     }).catch((err) => {
         if(err) {
             console.log(err);
