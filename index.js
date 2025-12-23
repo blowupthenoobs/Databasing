@@ -19,7 +19,7 @@ app.use(
 app.use(express.json())
 
 
-
+//#region Testing
 app.get("/select", async (req, res) => {
     User.findAll({ where: {email: "testing123@gmail.com"}}) //Where is optional, makes it only show results with the matching data
         .then((users) => {
@@ -30,16 +30,17 @@ app.get("/select", async (req, res) => {
         });
 });
 
-app.get("/insert", async (req, res) => {
-    User.create({
-        username: req.username,
-        email: req.email,
-        password: req.password
-    }).catch((err) => {
-        if(err) {
-            console.log(err);
-        }
-    })
+app.post("/insert", async (req, res) => {
+    // User.create({
+    //     username: req.body.username,
+    //     email: req.body.email,
+    //     password: req.body.password,
+    //     passwordLastModified: Date.now()
+    // }).catch((err) => {
+    //     if(err) {
+    //         console.log(err);
+    //     }
+    // })
 
     res.send('insert');
 });
@@ -69,8 +70,24 @@ app.get("/delete", async (req, res) => {
     User.destroy({ where: {id: 0}})
     res.send('destroy');
 });
+//#endregion Testing
 
+//#region UserAPI
+app.post("/user-service/create", async (req, res) => {
+    User.create({
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password,
+        passwordLastModified: Date.now()
+    }).catch((err) => {
+        if(err) {
+            console.log(err);
+        }
+    })
 
+    res.send('inserted new user');
+});
+//#endregion UserAPI
 
 db.sequelize.sync().then((req) => {
   app.listen(3001, () => {

@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.STRING,
         },
         passwordLastModified: {
-          type: DataTypes.INTEGER
+          type: DataTypes.DATE
         }
           
     }, {
