@@ -54,7 +54,7 @@ app.get("/tokening", async (req, res) => {
 
         const token = await user.createToken({
             token: "this is a token",
-            uuid: "this is a uuid",
+            uuid: "this is a uuid", //req.header.uuid works on the original website for whatever reason
             time: Date.now(),
             type: "temporary"
         })
@@ -87,6 +87,22 @@ app.post("/user-service/create", async (req, res) => {
 
     res.send('inserted new user');
 });
+
+app.post("/user-service/login", async (req, res) => {
+    
+
+    res.send('inserted new user');
+});
+
+app.post("/user-service/find-by-creds", async (req, res) => {
+    try {
+        const user = await User.findOne({where: {email: req.body.email}});
+        console.log(user);
+        res.send(user);
+    } catch(error) {
+        console.error(error);
+    }
+})
 //#endregion UserAPI
 
 db.sequelize.sync().then((req) => {
