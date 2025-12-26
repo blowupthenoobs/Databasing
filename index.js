@@ -99,13 +99,18 @@ app.post("/user-service/login", async (req, res) => {
         if(!attemptedUser)
             throw new NotAuthorizedError("Invalid Credentials")
 
-        if(attemptedUser.password != req.body.password)
+        if(attemptedUser.password !== req.body.password)
             throw new NotAuthorizedError("Invalid Credentials")
 
         const userToken = await CreateNewToken(attemptedUser.id);
-        res.send(userToken);
+        return res.send(userToken);
     } catch(error) {
         console.log(error);
+        
+        if(error instanceof NotAuthorizedError)
+            return res.status(401).send("Invalid Credentials")
+
+        return res.status(500).send("Login Failed: ", error)
     }
 });
 
@@ -124,7 +129,7 @@ app.post("/user-service/find-by-creds", async (req, res) => {
 async function CreateNewToken(identifier)
 {
     try {
-        const user = await User.findOne({where: {id: identifier}})
+        const user = await User.findByPk(identifier);
 
         if(!user)
             return res.status(404).send("user not found");
@@ -138,7 +143,7 @@ async function CreateNewToken(identifier)
             type: "temporary"
         })
 
-        res.send(tokenInfo.newCode)
+        return tokenInfo.newCode
     } catch (err) {
         console.error(err)
         res.status(500).send("error creating token")
