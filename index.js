@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 
+const crypto = require("crypto");
+
 // const mysql = require("mysql2");
 const db = require('./models');
 
@@ -53,7 +55,7 @@ app.get("/tokening", async (req, res) => {
             return res.status(404).send("user not found");
 
         const token = await user.createToken({
-            token: "this is a token",
+            token: CreateUniqueToken().hash,
             uuid: "this is a uuid", //req.header.uuid works on the original website for whatever reason
             time: Date.now(),
             type: "temporary"
@@ -89,7 +91,14 @@ app.post("/user-service/create", async (req, res) => {
 });
 
 app.post("/user-service/login", async (req, res) => {
-    
+    try{
+        const attemptedUser = await User.findOne({where: {email: req.body.email}});
+
+        if(!attemptedUser)
+            throw new NotAuthorizedError("Invalid Credentials")
+    } catch(error) {
+        console.log(error);
+    }
 
     res.send('inserted new user');
 });
@@ -104,6 +113,33 @@ app.post("/user-service/find-by-creds", async (req, res) => {
     }
 })
 //#endregion UserAPI
+
+//#region Tokening
+
+async function CreateUniqueToken()
+{
+    const MaxTries = 20;
+
+    for(let i = 0; i < MaxTries; i++)
+    {
+        const newCode = generateToken();
+        const newCodeHash = crypto.createHash("sha256").update(newCode).digest("hex");
+
+        const codeAlreadyUsed = await Token.findOne({where: {token: newCode}});
+        if(!codeAlreadyUsed)
+        {
+            const payload = {
+                client: newCode,
+                hash: newCodeHash
+            }
+
+            return payload;
+        }
+    }
+}
+
+
+//#endregion Tokening
 
 db.sequelize.sync().then((req) => {
   app.listen(3001, () => {
