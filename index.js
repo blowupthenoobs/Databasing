@@ -74,6 +74,21 @@ app.get("/delete", async (req, res) => {
     User.destroy({ where: {id: 0}})
     res.send('destroy');
 });
+
+app.get("/secreting", async (req, res) => {
+    try {
+        const newSecret = await Secret.create({
+            terminalCode: "accounting",
+            route: "/login",
+            hasNoPrerequisites: true
+        })
+
+        res.send(newSecret);
+    } catch(error) {
+        res.status(500).send("error making secret: ", error);
+    }
+    
+})
 //#endregion Testing
 
 //#region UserAPI
