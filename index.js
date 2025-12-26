@@ -123,6 +123,18 @@ app.post("/user-service/find-by-creds", async (req, res) => {
         console.error(error);
     }
 })
+
+app.post("/user-service/refresh-login-token", async (req, res) => {
+    try {
+        const token = await Token.findOne({where: {token: crypto.createHash("sha256").update(req.body.token).digest("hex")}})
+        const refreshedToken = await CreateNewToken(token.userId);
+
+        Token.destroy(token)
+    } catch(error) {
+        return res.status(500).send("error refreshing token: ", error);
+    }
+})
+
 //#endregion UserAPI
 
 //#region Tokening
@@ -138,9 +150,7 @@ async function CreateNewToken(identifier)
 
         const token = await user.createToken({
             token: tokenInfo.newCodeHash,
-            uuid: "this is a uuid", //req.header.uuid works on the original website for whatever reason
             time: Date.now(),
-            type: "temporary"
         })
 
         return tokenInfo.newCode

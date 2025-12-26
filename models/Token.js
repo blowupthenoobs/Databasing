@@ -6,18 +6,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.CHAR(64),
             allowNull: false
         },
-        uuid: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
         time: {
             type: DataTypes.BIGINT,
             allowNull: false
         },
-        type: {
-            type: DataTypes.ENUM("permanent", "temporary"),
-            allowNull: false
-        },
+        // type: {
+        //     type: DataTypes.ENUM("permanent", "temporary"),
+        //     allowNull: false
+        // },
     }, {
         timestamps: true,
         tableName: "tokens"
