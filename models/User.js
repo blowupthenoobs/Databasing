@@ -67,6 +67,7 @@ module.exports = (sequelize, DataTypes) => {
 
     User.associate = (models) => {
       User.hasMany(models.Token, { foreignKey: "userId", as: "tokens"})
+      User.hasMany(models.PrerequisiteCode, { foreignKey: "foundPrerequisites", as: "discoveredPaths"})
     }
     
     return User;

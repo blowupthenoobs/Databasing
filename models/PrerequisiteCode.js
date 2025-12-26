@@ -11,8 +11,8 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     PrerequisiteCode.associate = (models) => {
-        PrerequisiteCode.belongsToMany(models.User, {foreignKey: "secretId", as: "secret"})
-        PrerequisiteCode.belongsToMany(models.User, {foreignKey: "userId", as: "user"})
+        PrerequisiteCode.belongsToMany(models.Secret, {through: "secretPrerequisite", as: "secrets"})
+        PrerequisiteCode.belongsToMany(models.User, {through: "foundPrerequisites", as: "users"})
     }
 
     return PrerequisiteCode;
