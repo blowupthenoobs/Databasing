@@ -9,6 +9,8 @@ const db = require('./models');
 
 const { User } = require('./models')
 const { Token } = require('./models')
+const { Secret } = require('./models')
+const { PrerequisiteCode } = require('./models')
 
 app.use(
     cors({
@@ -78,14 +80,14 @@ app.get("/delete", async (req, res) => {
 app.get("/secreting", async (req, res) => {
     try {
         const newSecret = await Secret.create({
-            terminalCode: "accounting",
-            route: "/login",
+            terminalCode: "hackclub",
+            route: "/hackclub",
             hasNoPrerequisites: true
         })
-
         res.send(newSecret);
     } catch(error) {
-        res.status(500).send("error making secret: ", error);
+        console.log(error);
+        res.status(500).send("error making secret: ", error.toString());
     }
     
 })
@@ -206,6 +208,21 @@ async function CreateUniqueToken()
 
 
 //#endregion Tokening
+
+//#region SecretMachine
+app.post("/check-secret", async (req, res) => {
+    try {
+        const secret = await Secret.findOne({where: {terminalCode: req.body.terminalCode}})
+
+        if(secret.hasNoPrerequisites)
+            res.send(secret.route); //Will also need to attach the corresponding prerequisite to the user
+    } catch(error) {
+        res.send("")
+    }
+})
+
+
+//#endregion SecretMachine
 
 db.sequelize.sync().then((req) => {
   app.listen(3001, () => {
