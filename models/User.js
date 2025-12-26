@@ -16,10 +16,6 @@ module.exports = (sequelize, DataTypes) => {
                   throw new Error("Email is invalid");
                 }
               },
-              // lens: {
-              //   args: [3, 320],
-              //   msg: "Email must be between 3 and 320 characters"
-              // }
               customLen(value) {
                 if(value.length < 3) {
                   throw new Error("Email must be at least 3 characters")

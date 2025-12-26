@@ -54,14 +54,16 @@ app.get("/tokening", async (req, res) => {
         if(!user)
             return res.status(404).send("user not found");
 
+        const tokenInfo = await CreateUniqueToken();
+
         const token = await user.createToken({
-            token: CreateUniqueToken().hash,
+            token: tokenInfo.newCodeHash,
             uuid: "this is a uuid", //req.header.uuid works on the original website for whatever reason
             time: Date.now(),
             type: "temporary"
         })
 
-        res.send(token)
+        res.send(tokenInfo.newCode)
     } catch (err) {
         console.error(err)
         res.status(500).send("error creating token")
@@ -115,6 +117,15 @@ app.post("/user-service/find-by-creds", async (req, res) => {
 //#endregion UserAPI
 
 //#region Tokening
+async function CreateNewToken()
+{
+    
+}
+
+function generateToken()
+{
+    return crypto.randomBytes(32).toString("hex");
+}
 
 async function CreateUniqueToken()
 {
@@ -125,17 +136,14 @@ async function CreateUniqueToken()
         const newCode = generateToken();
         const newCodeHash = crypto.createHash("sha256").update(newCode).digest("hex");
 
-        const codeAlreadyUsed = await Token.findOne({where: {token: newCode}});
+        const codeAlreadyUsed = await Token.findOne({where: {token: newCodeHash}});
         if(!codeAlreadyUsed)
         {
-            const payload = {
-                client: newCode,
-                hash: newCodeHash
-            }
-
-            return payload;
+            return {newCode, newCodeHash};
         }
     }
+
+    throw new Error("Failed to generate unique Token");
 }
 
 
