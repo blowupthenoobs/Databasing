@@ -20,7 +20,6 @@ module.exports = (sequelize, DataTypes) => {
 
     Secret.associate = (models) => {
         Secret.hasMany(models.PrerequisiteCode, {foreignKey: "prerequisiteId", as: "prerequisite"})
-        Secret.hasMany(models.User, {foreignKey: "userId", as: "user"})
     }
 
     return Secret;
