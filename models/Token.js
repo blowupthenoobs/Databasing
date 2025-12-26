@@ -4,7 +4,8 @@ module.exports = (sequelize, DataTypes) => {
     const Token = sequelize.define("Token", {
         token: {
             type: DataTypes.CHAR(64),
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
         time: {
             type: DataTypes.BIGINT,

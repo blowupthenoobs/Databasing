@@ -127,9 +127,14 @@ app.post("/user-service/find-by-creds", async (req, res) => {
 app.post("/user-service/refresh-login-token", async (req, res) => {
     try {
         const token = await Token.findOne({where: {token: crypto.createHash("sha256").update(req.body.token).digest("hex")}})
+
+        if(!token)
+            return res.sendStatus(204);
+
         const refreshedToken = await CreateNewToken(token.userId);
 
-        Token.destroy(token)
+        token.destroy()
+        return res.send(refreshedToken)
     } catch(error) {
         return res.status(500).send("error refreshing token: ", error);
     }
