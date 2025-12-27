@@ -27,8 +27,8 @@ app.use(express.json())
 app.get("/secreting", async (req, res) => {
     try {
         const newSecret = await Secret.create({
-            terminalCode: "hackclub",
-            route: "/hackclub",
+            terminalCode: "welcome",
+            route: "/welcome",
             hasNoPrerequisites: true
         })
         res.send(newSecret);
@@ -37,6 +37,43 @@ app.get("/secreting", async (req, res) => {
         res.status(500).send("error making secret: ", error.toString());
     }
     
+})
+
+app.get("/prereq", async (req, res) => {
+    try {
+        const newPreRequisite = await PrerequisiteCode.create({
+            code: "admin"
+        })
+        res.send(newPreRequisite);
+    } catch (error) {
+        console.log(error)
+        res.status(500).send("error making prerequisite: ", error.toString());
+    }
+})
+
+app.get("/binding", async (req, res) => {
+    try {
+        const secretToBind = await Secret.findOne({where: {terminalCode: "welcome"}}) //The secret you want to add a prerequisite to
+        const preReqToBind = await PrerequisiteCode.findOne({where: {code: "accounting"}}) //Code of previous entry
+
+        secretToBind.addPrerequisite(preReqToBind);
+        res.send("success")
+    } catch (error) {
+        console.log(error);
+        res.send("error making binding");
+    }
+})
+
+app.get("/find-prereqs", async (req, res) => {
+    try {
+        const secretToLookAt = await Secret.findOne({where: {terminalCode: "welcome"}})
+        const preReqs = secretToLookAt.getPrerequisites()
+
+        res.send(preReqs);
+    } catch (error) {
+        console.log(error);
+        res.send("error finding prereqs");
+    }
 })
 //#endregion ManualShenanigans
 

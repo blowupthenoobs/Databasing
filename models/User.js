@@ -31,18 +31,6 @@ module.exports = (sequelize, DataTypes) => {
           trim: true,
           required: true,
         },
-        privateKey: {
-          type: DataTypes.STRING,
-        },
-        publicKey: {
-          type: DataTypes.STRING,
-        },
-        emailVerified: {
-          type: DataTypes.BOOLEAN,
-        },
-        emailToken: {
-          type: DataTypes.STRING,
-        },
         passwordResetToken: {
           type: DataTypes.STRING,
         },
