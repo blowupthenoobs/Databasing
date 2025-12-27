@@ -27,8 +27,8 @@ app.use(express.json())
 app.get("/secreting", async (req, res) => {
     try {
         const newSecret = await Secret.create({
-            terminalCode: "welcome",
-            route: "/welcome",
+            terminalCode: "blogwrite",
+            route: "/tools/blogging",
             hasNoPrerequisites: false
         })
         res.send(newSecret);
@@ -53,8 +53,8 @@ app.get("/prereq", async (req, res) => {
 
 app.get("/bindPreReqs", async (req, res) => {
     try {
-        const secretToBind = await Secret.findOne({where: {terminalCode: "welcome"}}) //The secret you want to add a prerequisite to
-        const preReqToBind = await PrerequisiteCode.findOne({where: {code: "accounting"}}) //Code of previous entry
+        const secretToBind = await Secret.findOne({where: {terminalCode: "blogwrite"}}) //The secret you want to add a prerequisite to
+        const preReqToBind = await PrerequisiteCode.findOne({where: {code: "admin"}}) //Code of previous entry
 
         secretToBind.addPrerequisite(preReqToBind);
         res.send("success")
@@ -259,7 +259,30 @@ app.post("/check-secret", async (req, res) => {
     }
 })
 
+app.post("/check-perms-for-route", async (req, res) => {
+    try {
+        const user = await GetUserWithToken(req.body.token);
 
+        const secret = await Secret.findOne({where: {terminalCode: req.body.route}})
+
+        if(!user)
+            res.send("bump");
+        
+        const preRequisite = await secret.getPrerequisites();
+
+        for(i = 0; i < preRequisite.length; i++)
+        {
+            const hasPreReq = await preRequisite[i].hasUser(user);
+            if(!hasPreReq)
+                res.send("bump")
+        }
+        
+        res.send("hasPerms");
+    } catch (error) {
+        console.log(error);
+        res.send("bump");
+    }
+})
 //#endregion SecretMachine
 
 db.sequelize.sync().then((req) => {
