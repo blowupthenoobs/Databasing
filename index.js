@@ -23,60 +23,7 @@ app.use(
 app.use(express.json())
 
 
-//#region Testing
-app.get("/select", async (req, res) => {
-    User.findAll({ where: {email: "testing123@gmail.com"}}) //Where is optional, makes it only show results with the matching data
-        .then((users) => {
-            res.send(users);
-        })
-        .catch((err) => {
-            console.error("Error in /select: ", err);
-        });
-});
-
-app.post("/insert", async (req, res) => {
-    // User.create({
-    //     username: req.body.username,
-    //     email: req.body.email,
-    //     password: req.body.password,
-    //     passwordLastModified: Date.now()
-    // }).catch((err) => {
-    //     if(err) {
-    //         console.log(err);
-    //     }
-    // })
-
-    res.send('insert');
-});
-
-app.get("/tokening", async (req, res) => {
-    try {
-        const user = await User.findOne({where: {email: "testing123@gmail.com"}})
-
-        if(!user)
-            return res.status(404).send("user not found");
-
-        const tokenInfo = await CreateUniqueToken();
-
-        const token = await user.createToken({
-            token: tokenInfo.newCodeHash,
-            uuid: "this is a uuid", //req.header.uuid works on the original website for whatever reason
-            time: Date.now(),
-            type: "temporary"
-        })
-
-        res.send(tokenInfo.newCode)
-    } catch (err) {
-        console.error(err)
-        res.status(500).send("error creating token")
-    }
-});
-
-app.get("/delete", async (req, res) => {
-    User.destroy({ where: {id: 0}})
-    res.send('destroy');
-});
-
+//#region ManualShenanigans
 app.get("/secreting", async (req, res) => {
     try {
         const newSecret = await Secret.create({
@@ -91,22 +38,31 @@ app.get("/secreting", async (req, res) => {
     }
     
 })
-//#endregion Testing
+//#endregion ManualShenanigans
 
 //#region UserAPI
 app.post("/user-service/create", async (req, res) => {
-    User.create({
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-        passwordLastModified: Date.now()
-    }).catch((err) => {
-        if(err) {
-            console.log(err);
-        }
-    })
+    try {
+        const attemptedPassword = req.body.password;
 
-    res.send('inserted new user');
+        if(attemptedPassword.length < 6 || attemptedPassword.length > 256)
+            throw new Error("Password must be between 6 and 256 characters");
+
+        const newUser = await User.create({
+            username: req.body.username,
+            email: req.body.email,
+            password: Hashify(req.body.password),
+            passwordLastModified: Date.now()
+        })
+
+        const token = CreateNewToken(newUser.id)
+        res.send(token);
+    } catch(error) {
+        console.log(error)
+        res.status(500).send("Error Creating Account: ", error);
+    }
+
+    
 });
 
 app.post("/user-service/login", async (req, res) => {
@@ -116,7 +72,7 @@ app.post("/user-service/login", async (req, res) => {
         if(!attemptedUser)
             throw new NotAuthorizedError("Invalid Credentials")
 
-        if(attemptedUser.password !== req.body.password)
+        if(attemptedUser.password !== Hashify(req.body.password))
             throw new NotAuthorizedError("Invalid Credentials")
 
         const userToken = await CreateNewToken(attemptedUser.id);
@@ -143,7 +99,7 @@ app.post("/user-service/find-by-creds", async (req, res) => {
 
 app.post("/user-service/refresh-login-token", async (req, res) => {
     try {
-        const token = await Token.findOne({where: {token: crypto.createHash("sha256").update(req.body.token).digest("hex")}})
+        const token = await Token.findOne({where: {token: Hashify(req.body.token)}})
 
         if(!token)
             return res.sendStatus(204);
@@ -194,7 +150,7 @@ async function CreateUniqueToken()
     for(let i = 0; i < MaxTries; i++)
     {
         const newCode = generateToken();
-        const newCodeHash = crypto.createHash("sha256").update(newCode).digest("hex");
+        const newCodeHash = Hashify(newCode);
 
         const codeAlreadyUsed = await Token.findOne({where: {token: newCodeHash}});
         if(!codeAlreadyUsed)
@@ -209,6 +165,13 @@ async function CreateUniqueToken()
 
 //#endregion Tokening
 
+//#region Encryption
+function Hashify(input)
+{
+    return crypto.createHash("sha256").update(input).digest("hex")
+}
+//#endregion Encryption
+
 //#region SecretMachine
 app.post("/check-secret", async (req, res) => {
     try {
@@ -216,6 +179,8 @@ app.post("/check-secret", async (req, res) => {
 
         if(secret.hasNoPrerequisites)
             res.send(secret.route); //Will also need to attach the corresponding prerequisite to the user
+        
+        res.send("")
     } catch(error) {
         res.send("")
     }

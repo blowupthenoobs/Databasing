@@ -27,20 +27,9 @@ module.exports = (sequelize, DataTypes) => {
           }
         },
         password: {
-          type: DataTypes.STRING,
+          type: DataTypes.STRING(512),
           trim: true,
           required: true,
-          validate: {
-            customLen(value)
-            {
-              if (value.length < 6) {
-                throw new Error("Password length must be at least 6 characters");
-              } else if (value.length > 256) {
-                throw new Error("Password length must be less than 256 characters");
-              }
-            }
-            
-          }
         },
         privateKey: {
           type: DataTypes.STRING,
