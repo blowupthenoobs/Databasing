@@ -29,7 +29,7 @@ app.get("/secreting", async (req, res) => {
         const newSecret = await Secret.create({
             terminalCode: "welcome",
             route: "/welcome",
-            hasNoPrerequisites: true
+            hasNoPrerequisites: false
         })
         res.send(newSecret);
     } catch(error) {
@@ -67,7 +67,7 @@ app.get("/binding", async (req, res) => {
 app.get("/find-prereqs", async (req, res) => {
     try {
         const secretToLookAt = await Secret.findOne({where: {terminalCode: "welcome"}})
-        const preReqs = secretToLookAt.getPrerequisites()
+        const preReqs = await secretToLookAt.getPrerequisites()
 
         res.send(preReqs);
     } catch (error) {
@@ -199,7 +199,13 @@ async function CreateUniqueToken()
     throw new Error("Failed to generate unique Token");
 }
 
+async function GetUserWithToken(key)
+{
+    const token = await Token.findOne({where: {token: Hashify(key)}})
 
+    const user = await User.findByPk(token.userId);
+    return user;
+}
 //#endregion Tokening
 
 //#region Encryption
@@ -217,7 +223,21 @@ app.post("/check-secret", async (req, res) => {
         if(secret.hasNoPrerequisites)
             res.send(secret.route); //Will also need to attach the corresponding prerequisite to the user
         
-        res.send("")
+        const user = await GetUserWithToken(req.body.token);
+
+        if(!user);
+            res.send("");
+        
+        const preRequisite = await secret.getPrerequisites();
+
+        for(i = 0; i < preRequisite.length; i++)
+        {
+            const hasPreReq = await preRequisite[i].hasUser(user);
+            if(!hasPreReq)
+                res.send("/hah")
+        }
+        
+        res.send(secret.route);
     } catch(error) {
         res.send("")
     }
