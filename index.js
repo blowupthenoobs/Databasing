@@ -51,7 +51,7 @@ app.get("/prereq", async (req, res) => {
     }
 })
 
-app.get("/binding", async (req, res) => {
+app.get("/bindPreReqs", async (req, res) => {
     try {
         const secretToBind = await Secret.findOne({where: {terminalCode: "welcome"}}) //The secret you want to add a prerequisite to
         const preReqToBind = await PrerequisiteCode.findOne({where: {code: "accounting"}}) //Code of previous entry
@@ -61,6 +61,19 @@ app.get("/binding", async (req, res) => {
     } catch (error) {
         console.log(error);
         res.send("error making binding");
+    }
+})
+
+app.get("/binduser", async (req, res) => {
+    try {
+        const preReqToBind = await PrerequisiteCode.findOne({where: {code: "admin"}}) //Code of previous entry
+        const userToBind = await User.findOne({where: {email: "jeremiah122508@gmail.com"}}) //My email
+
+        preReqToBind.addUser(userToBind);
+        res.send(preReqToBind);
+    } catch (error) {
+        console.log(error)
+        res.send("error making binding")
     }
 })
 
@@ -91,6 +104,9 @@ app.post("/user-service/create", async (req, res) => {
             password: Hashify(req.body.password),
             passwordLastModified: Date.now()
         })
+
+        const newDiscoveredPath = await PrerequisiteCode.findOne({where: {code: "accounting"}})
+        newDiscoveredPath.addUser(newUser);
 
         const token = CreateNewToken(newUser.id)
         res.send(token);
@@ -225,7 +241,7 @@ app.post("/check-secret", async (req, res) => {
         
         const user = await GetUserWithToken(req.body.token);
 
-        if(!user);
+        if(!user)
             res.send("");
         
         const preRequisite = await secret.getPrerequisites();
@@ -234,7 +250,7 @@ app.post("/check-secret", async (req, res) => {
         {
             const hasPreReq = await preRequisite[i].hasUser(user);
             if(!hasPreReq)
-                res.send("/hah")
+                res.send("")
         }
         
         res.send(secret.route);
