@@ -278,12 +278,13 @@ app.post("/check-perms-for-route", async (req, res) => {
     try {
         const user = await GetUserWithToken(req.body.token);
 
-        const secret = await Secret.findOne({where: {terminalCode: req.body.route}})
+        const secret = await Secret.findOne({where: {route: req.body.route}})
 
         if(!user)
             res.send("bump");
         
         const preRequisite = await secret.getPrerequisites();
+        console.log(preRequisite)
 
         for(i = 0; i < preRequisite.length; i++)
         {
