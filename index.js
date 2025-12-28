@@ -323,7 +323,13 @@ app.get("/get-blogs", async (req, res) => {
 })
 
 app.get("/get-recent-blog", async (req, res) => {
-    const blogs = await Blog.findOne({where: {blogType: "blog"}}, {order:[["createdAt", "DESC"]]})
+    try {
+        const blogs = await Blog.findOne({where: {blogType: "blog"}}, {order:[["createdAt", "DESC"]]})
+        res.send(blogs);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("error with getting blogs");
+    }
 })
 //#endregion MiscDatabases
 
