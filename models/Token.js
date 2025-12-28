@@ -11,10 +11,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BIGINT,
             allowNull: false
         },
-        // type: {
-        //     type: DataTypes.ENUM("permanent", "temporary"),
-        //     allowNull: false
-        // },
     }, {
         timestamps: true,
         tableName: "tokens"

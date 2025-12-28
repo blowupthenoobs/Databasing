@@ -11,6 +11,7 @@ const { User } = require('./models')
 const { Token } = require('./models')
 const { Secret } = require('./models')
 const { PrerequisiteCode } = require('./models')
+const { Blog } = require('./models')
 
 app.use(
     cors({
@@ -284,6 +285,16 @@ app.post("/check-perms-for-route", async (req, res) => {
     }
 })
 //#endregion SecretMachine
+
+//#region MiscDatabases
+app.get("/get-blogs", async (req, res) => {
+    const blogs = await Blog.findAll({where: {blogType: "blog"}}, {order:[["createdAt", "DESC"]]})
+})
+
+app.get("/get-recent-blog", async (req, res) => {
+    const blogs = await Blog.findOne({where: {blogType: "blog"}}, {order:[["createdAt", "DESC"]]})
+})
+//#endregion MiscDatabases
 
 db.sequelize.sync().then((req) => {
   app.listen(3001, () => {
