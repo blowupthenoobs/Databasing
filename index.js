@@ -313,7 +313,13 @@ app.post("/check-perms-for-route", async (req, res) => {
 
 //#region MiscDatabases
 app.get("/get-blogs", async (req, res) => {
-    const blogs = await Blog.findAll({where: {blogType: "blog"}}, {order:[["createdAt", "DESC"]]})
+    try {
+        const blogs = await Blog.findAll({where: {blogType: "blog"}}, {order:[["createdAt", "DESC"]]})
+        res.send(blogs);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("error with getting blogs");
+    }
 })
 
 app.get("/get-recent-blog", async (req, res) => {
