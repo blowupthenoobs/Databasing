@@ -89,6 +89,20 @@ app.get("/find-prereqs", async (req, res) => {
         res.send("error finding prereqs");
     }
 })
+
+app.get("/blog", async (req, res) => {
+    try {
+        const newBlog = await Blog.create({
+            title: "Testing",
+            content: "Here's the body text for the first blog thumbnail, just to get a feel for how it'll look like later",
+            blogType: "blog"
+        })
+        res.send(newBlog);
+    } catch (error) {
+        console.log(error);
+        res.send("error making blog");
+    }
+})
 //#endregion ManualShenanigans
 
 //#region UserAPI
