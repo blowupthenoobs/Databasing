@@ -181,6 +181,16 @@ app.post("/user-service/refresh-login-token", async (req, res) => {
     }
 })
 
+app.post("/user-service/get-username", async (req, res) => {
+    try{
+        const user = await GetUserWithToken(req.body.token);
+
+        res.send(user.username)
+    } catch (error) {
+        console.log(error);
+        res.send("unknown user")
+    }
+})
 //#endregion UserAPI
 
 //#region Tokening
