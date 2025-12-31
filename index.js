@@ -311,7 +311,7 @@ app.post("/check-perms-for-route", async (req, res) => {
 })
 //#endregion SecretMachine
 
-//#region MiscDatabases
+//#region Blogging
 app.get("/get-blogs", async (req, res) => {
     try {
         const blogs = await Blog.findAll({where: {blogType: "blog"}}, {order:[["createdAt", "DESC"]]})
@@ -331,7 +331,17 @@ app.get("/get-recent-blog", async (req, res) => {
         res.status(500).send("error with getting blogs");
     }
 })
-//#endregion MiscDatabases
+
+app.post("/get-blog", async (req, res) => {
+    try {
+        const blog = await Blog.findOne({where: {title: req.body.article}});
+        res.send(blog);
+    } catch (error) {
+        console.log("Error sending blog: ", error);
+        res.status(500).send("error sending blog");
+    }
+})
+//#endregion Blogging
 
 db.sequelize.sync().then((req) => {
   app.listen(3001, () => {
