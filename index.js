@@ -341,6 +341,21 @@ app.post("/get-blog", async (req, res) => {
         res.status(500).send("error sending blog");
     }
 })
+
+app.post("/post-blog", async (req, res) => {
+    try {
+        const blog = await Blog.create({
+            title: req.body.title,
+            content: req.body.content,
+            blogType: req.body.blogType
+        })
+
+        res.send("/" + blog.title);
+    } catch (error) {
+        console.log("error creating blog: ", error);
+        res.status(500).send("error creating blog")
+    }
+})
 //#endregion Blogging
 
 db.sequelize.sync().then((req) => {
